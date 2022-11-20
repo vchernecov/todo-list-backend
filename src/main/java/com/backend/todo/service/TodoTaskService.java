@@ -15,9 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoTaskService {
@@ -84,5 +86,17 @@ public class TodoTaskService {
                     throw new TaskNotFoundException("Task not found");
                 }
         );
+    }
+
+    @Transactional
+    public void removeOldTodoTasks() {
+        List<TodoTaskEntity> todoTaskEntities = todoTaskRepository.findByDueDateBefore(LocalDate.now());
+
+        todoTaskEntities
+                .stream()
+                .peek(todoTask -> {
+                    todoTask.setState(TodoTaskState.ARCHIVE);
+                })
+                .collect(Collectors.toList());
     }
 }

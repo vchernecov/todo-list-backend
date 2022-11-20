@@ -4,5 +4,6 @@ public enum TodoTaskState {
     IN_PROGRESS,
     DONE,
     CANCELED,
-    DELETED
+    DELETED,
+    ARCHIVE
 }
