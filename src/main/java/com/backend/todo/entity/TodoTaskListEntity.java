@@ -37,6 +37,6 @@ public class TodoTaskListEntity implements Serializable {
     private Set<TodoTaskEntity> tasks = Collections.emptySet();
 
     public void mergeTasks(Set<TodoTaskEntity> newTasks) {
-        tasks = CollectionHelper.merge(tasks, newTasks);
+        setTasks(CollectionHelper.merge(tasks, newTasks));
     }
 }

@@ -1,6 +1,7 @@
 package com.backend.todo.controller;
 
 import com.backend.todo.dto.TodoTaskDto;
+import com.backend.todo.entity.TodoTaskState;
 import com.backend.todo.service.TodoTaskService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +27,12 @@ public class TodoController {
     @GetMapping("/{userId}")
     public List<TodoTaskDto> getTasksByUserId(@PathVariable long userId) {
         return todoTaskService.getTodoTasks(userId);
+    }
+
+    @PatchMapping("/{taskId}")
+    public ResponseEntity<HttpStatus> deleteTask(@PathVariable long taskId) {
+        todoTaskService.changeStatus(taskId, TodoTaskState.DELETED);
+
+        return new  ResponseEntity<>(HttpStatus.OK);
     }
 }
