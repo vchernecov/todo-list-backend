@@ -9,8 +9,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-
-logging:
-  level:
-    org.hibernate.SQL: error
-    org.hibernate.type: trace

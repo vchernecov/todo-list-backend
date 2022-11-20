@@ -7,6 +7,8 @@ import com.backend.todo.entity.TodoTaskState;
 import com.backend.todo.mapper.Mapper;
 import com.backend.todo.repository.TodoTaskListRepository;
 import com.backend.todo.repository.TodoTaskRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import java.util.Set;
 
 @Service
 public class TodoTaskService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TodoTaskService.class);
     private final TodoTaskListRepository todoTaskListRepository;
     private final Mapper<TodoTaskListEntity, TodoTaskDto> todoTaskListMapper;
     private final Mapper<List<TodoTaskDto>, TodoTaskListEntity> todoTaskMapper;
@@ -38,11 +41,14 @@ public class TodoTaskService {
 
     @Transactional
     public void createTodoTask(TodoTaskDto todoTaskDto) {
+        LOGGER.info("Start create task with parameters: {}^^", todoTaskDto);
         boolean isExistsTaskList = todoTaskListRepository.existsByUserId(todoTaskDto.getUserId());
         if (!isExistsTaskList) {
+            LOGGER.info("New task will be created");
             TodoTaskListEntity todoTaskListEntity = todoTaskListMapper.map(todoTaskDto);
             todoTaskListRepository.save(todoTaskListEntity);
         } else {
+            LOGGER.info("Task list with id: {} is exists", todoTaskDto.getUserId());
             TodoTaskListEntity todoTaskList = todoTaskListRepository.findByUserId(todoTaskDto.getUserId());
             Set<TodoTaskEntity> newTasks = todoTaskSetMapper.map(todoTaskDto);
             todoTaskList.mergeTasks(newTasks);
@@ -61,9 +67,10 @@ public class TodoTaskService {
 
         task.ifPresentOrElse(entity -> {
                     entity.setState(todoTaskState);
+                    LOGGER.info("Task with id {} removed", entity.getId());
                 },
                 () -> {
-                    System.out.println("Error set state"); // TODO Add logger
+                    LOGGER.error("Task with id: {} not found", taskId);
                 }
         );
     }
