@@ -89,10 +89,10 @@ public class TodoTaskService {
     }
 
     @Transactional
-    public void removeOldTodoTasks() {
-        List<TodoTaskEntity> todoTaskEntities = todoTaskRepository.findByDueDateBefore(LocalDate.now());
+    public List<TodoTaskEntity> removeOldTodoTasks() {
+        List<TodoTaskEntity> todoTaskEntities = todoTaskRepository.findByDueDateBeforeAndStateNot(LocalDate.now(), TodoTaskState.ARCHIVE);
 
-        todoTaskEntities
+        return todoTaskEntities
                 .stream()
                 .peek(todoTask -> {
                     todoTask.setState(TodoTaskState.ARCHIVE);
