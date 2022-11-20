@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class TodoTaskMapper implements Mapper<List<TodoTaskDto>, TodoTaskListEntity> {
+public class TodoTaskDtoListMapper implements Mapper<List<TodoTaskDto>, TodoTaskListEntity> {
     @Override
     public List<TodoTaskDto> map(TodoTaskListEntity source) {
         return source.getTasks()
@@ -18,6 +18,7 @@ public class TodoTaskMapper implements Mapper<List<TodoTaskDto>, TodoTaskListEnt
                         .title(entity.getTitle())
                         .body(entity.getBody())
                         .dueDate(entity.getDueDate())
+                        .state(entity.getState().name())
                         .build())
                 .collect(Collectors.toList());
     }

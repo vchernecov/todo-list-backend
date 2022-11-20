@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TodoTaskListRepository extends JpaRepository<TodoTaskListEntity, Long> {
     TodoTaskListEntity findByUserId(long userId);
+    boolean existsByUserId(long userId);
 }

@@ -1,11 +1,14 @@
 package com.backend.todo.entity;
 
+import com.backend.todo.utils.CollectionHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -20,7 +23,9 @@ import java.util.Set;
         sequenceName = "todo_task_list_sequence",
         allocationSize = 1
 )
-public class TodoTaskListEntity {
+public class TodoTaskListEntity implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -8811781968704991368L;
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "todo_task_list_generator")
     private Long id;
@@ -30,4 +35,8 @@ public class TodoTaskListEntity {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "todo_task_list_id")
     private Set<TodoTaskEntity> tasks = Collections.emptySet();
+
+    public void mergeTasks(Set<TodoTaskEntity> newTasks) {
+        tasks = CollectionHelper.merge(tasks, newTasks);
+    }
 }
