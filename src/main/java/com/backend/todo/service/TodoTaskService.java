@@ -4,9 +4,12 @@ import com.backend.todo.dto.TodoTaskDto;
 import com.backend.todo.entity.TodoTaskEntity;
 import com.backend.todo.entity.TodoTaskListEntity;
 import com.backend.todo.entity.TodoTaskState;
+import com.backend.todo.exception.DatabaseException;
+import com.backend.todo.exception.TaskNotFoundException;
 import com.backend.todo.mapper.Mapper;
 import com.backend.todo.repository.TodoTaskListRepository;
 import com.backend.todo.repository.TodoTaskRepository;
+import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,16 +45,22 @@ public class TodoTaskService {
     @Transactional
     public void createTodoTask(TodoTaskDto todoTaskDto) {
         LOGGER.info("Start create task with parameters: {}^^", todoTaskDto);
-        boolean isExistsTaskList = todoTaskListRepository.existsByUserId(todoTaskDto.getUserId());
-        if (!isExistsTaskList) {
-            LOGGER.info("New task will be created");
-            TodoTaskListEntity todoTaskListEntity = todoTaskListMapper.map(todoTaskDto);
-            todoTaskListRepository.save(todoTaskListEntity);
-        } else {
-            LOGGER.info("Task list with id: {} is exists", todoTaskDto.getUserId());
-            TodoTaskListEntity todoTaskList = todoTaskListRepository.findByUserId(todoTaskDto.getUserId());
-            Set<TodoTaskEntity> newTasks = todoTaskSetMapper.map(todoTaskDto);
-            todoTaskList.mergeTasks(newTasks);
+        try {
+            boolean isExistsTaskList = todoTaskListRepository.existsByUserId(todoTaskDto.getUserId());
+            if (!isExistsTaskList) {
+                LOGGER.info("New task will be created");
+                TodoTaskListEntity todoTaskListEntity = todoTaskListMapper.map(todoTaskDto);
+                todoTaskListRepository.save(todoTaskListEntity);
+            } else {
+                LOGGER.info("Task list with id: {} is exists", todoTaskDto.getUserId());
+                TodoTaskListEntity todoTaskList = todoTaskListRepository.findByUserId(todoTaskDto.getUserId());
+                Set<TodoTaskEntity> newTasks = todoTaskSetMapper.map(todoTaskDto);
+                todoTaskList.mergeTasks(newTasks);
+            }
+        } catch (HibernateException e) {
+            LOGGER.error("Database error: {}", e.getMessage());
+
+            throw new DatabaseException(e.getMessage());
         }
     }
 
@@ -71,6 +80,8 @@ public class TodoTaskService {
                 },
                 () -> {
                     LOGGER.error("Task with id: {} not found", taskId);
+
+                    throw new TaskNotFoundException("Task not found");
                 }
         );
     }
