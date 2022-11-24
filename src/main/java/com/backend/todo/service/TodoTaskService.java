@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,11 +33,11 @@ public class TodoTaskService {
     private final TodoTaskRepository todoTaskRepository;
 
     public TodoTaskService(
-            TodoTaskListRepository todoTaskListRepository,
-            Mapper<TodoTaskListEntity, TodoTaskDto> todoTaskListMapper,
-            Mapper<List<TodoTaskDto>, TodoTaskListEntity> todoTaskMapper,
-            Mapper<Set<TodoTaskEntity>, TodoTaskDto> todoTaskSetMapper,
-            TodoTaskRepository todoTaskRepository
+            final TodoTaskListRepository todoTaskListRepository,
+            final Mapper<TodoTaskListEntity, TodoTaskDto> todoTaskListMapper,
+            final Mapper<List<TodoTaskDto>, TodoTaskListEntity> todoTaskMapper,
+            final Mapper<Set<TodoTaskEntity>, TodoTaskDto> todoTaskSetMapper,
+            final TodoTaskRepository todoTaskRepository
     ) {
         this.todoTaskListRepository = todoTaskListRepository;
         this.todoTaskListMapper = todoTaskListMapper;
@@ -55,7 +57,8 @@ public class TodoTaskService {
                 todoTaskListRepository.save(todoTaskListEntity);
             } else {
                 LOGGER.info("Task list with id: {} is exists", todoTaskDto.getUserId());
-                TodoTaskListEntity todoTaskList = todoTaskListRepository.findByUserId(todoTaskDto.getUserId());
+                TodoTaskListEntity todoTaskList = todoTaskListRepository
+                        .findByUserId(todoTaskDto.getUserId());
                 Set<TodoTaskEntity> newTasks = todoTaskSetMapper.map(todoTaskDto);
                 todoTaskList.mergeTasks(newTasks);
             }
@@ -66,8 +69,10 @@ public class TodoTaskService {
         }
     }
 
+    @Transactional
     public List<TodoTaskDto> getTodoTasks(long userId) {
-        TodoTaskListEntity todoTaskListEntity = todoTaskListRepository.findByUserId(userId);
+        TodoTaskListEntity todoTaskListEntity = todoTaskListRepository
+                .findByUserId(userId);
 
         return todoTaskMapper.map(todoTaskListEntity);
     }
@@ -78,6 +83,7 @@ public class TodoTaskService {
 
         task.ifPresentOrElse(entity -> {
                     entity.setState(todoTaskState);
+                    entity.setUpdateDateTime(LocalDateTime.now());
                     LOGGER.info("Task with id {} removed", entity.getId());
                 },
                 () -> {
